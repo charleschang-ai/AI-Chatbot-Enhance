@@ -1,5 +1,5 @@
 from odoo import api, fields, models
-from odoo.fields import Domain
+# from odoo.fields import Domain
 
 PROMPT_MODULE_MAP = {
     "mass_mailing": ["ai_prompt_optout_reason"],
@@ -47,6 +47,6 @@ class AIPromptButton(models.Model):
                         skip_ids.append(record.id)
 
         if skip_ids:
-            domain = Domain.AND([Domain('id', 'not in', skip_ids), domain])
+            domain = [('id', 'not in', skip_ids)] + domain
 
         return super()._search(domain, *args, **kwargs)

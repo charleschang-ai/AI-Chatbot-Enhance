@@ -34,7 +34,7 @@ class AIEmbedding(models.Model):
     embedding_model = fields.Selection(selection=EMBEDDING_MODELS_SELECTION, string="Embedding Model", required=True)
     has_embedding_generation_failed = fields.Boolean(string="Has Embedding Generation Failed", default=False)
     embedding_vector = Vector(size=1536)
-    _embedding_vector_idx = models.Index("USING ivfflat (embedding_vector vector_cosine_ops)")
+    # _embedding_vector_idx = models.Index("USING ivfflat (embedding_vector vector_cosine_ops)")
 
     @api.model
     def _get_dimensions(self):

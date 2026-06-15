@@ -97,14 +97,18 @@ class LLMApiService:
         AI_MAX_TOOL_CALLS_PER_CALL = 20
 
         if tools:
-            tools = copy.deepcopy(tools)
+            tools = {
+                name: (description, allow_end_message, func, copy.deepcopy(schema))
+                for name, (description, allow_end_message, func, schema) in tools.items()
+            }
             for __, allow_end_message, __, tool_parameter_schema in tools.values():
                 if allow_end_message and "__end_message" not in tool_parameter_schema["properties"]:
                     tool_parameter_schema["properties"]["__end_message"] = {
                         "type": "string",
                         "description": "If you are not waiting a result and you are done, write here your last message (it must follow the instructions). If you will do an action after this one, leave it empty.",
                     }
-                if "__end_message" in tool_parameter_schema["properties"] and "__end_message" not in tool_parameter_schema["required"]:
+                if "__end_message" in tool_parameter_schema["properties"] and "__end_message" not in \
+                        tool_parameter_schema["required"]:
                     tool_parameter_schema["required"].append("__end_message")
 
         inputs = inputs or []

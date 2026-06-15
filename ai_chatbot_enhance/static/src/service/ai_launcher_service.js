@@ -75,11 +75,9 @@ export const aiChatLauncherService = {
                 agentId = null,
             }) {
                 let frontEndRecordInfo;
-                // if the component calling the AI has access to record info, we pass it straight to the AI
                 if (['html_field_record', 'html_field_text_select', 'chatter_ai_button'].includes(callerComponentName)) {
                     frontEndRecordInfo = this.recordDataToContextJSON(originalRecordData, originalRecordFields);
                 }
-                // make the insert button target the component that called the AI
                 services['mail.store'].aiInsertButtonTarget = aiChatSourceId;
 
                 const { ai_channel_id, data, prompts, model_has_thread } = await services.orm.call(
@@ -95,15 +93,16 @@ export const aiChatLauncherService = {
                         agentId,
                     ],
                 );
-
-                services['mail.store'].insert(data);
+                // services['mail.store'].insert(data);
                 const thread = await services['mail.store'].Thread.getOrFetch({
                     model: "discuss.channel",
                     id: Number(ai_channel_id),
                 });
-                browser.localStorage.setItem("ai.thread.prompt_buttons.".concat(thread.id), JSON.stringify(prompts));
 
-                // add sendMessage and logNote only if the model inherits from mail.thread
+                const promptButtons = prompts.map((text, idx) => ({id: idx, text: text}));
+                browser.localStorage.setItem(`ai.thread.prompt_buttons.${ai_channel_id}`, JSON.stringify(promptButtons));
+                // browser.localStorage.setItem("ai.thread.prompt_buttons.".concat(thread.id), JSON.stringify(prompts));
+
                 if (callerComponentName === "chatter_ai_button" && model_has_thread) {
                     aiSpecialActions = {
                         ...(aiSpecialActions || {}),
@@ -113,7 +112,7 @@ export const aiChatLauncherService = {
                             openFullComposer("note", recordModel, recordId, content),
                     };
                 }
-                thread.ai_prompt_buttons = prompts;
+                // thread.ai_prompt_buttons = prompts;
                 thread.aiSpecialActions = aiSpecialActions;
                 thread.aiChatSource = aiChatSourceId;
                 thread.open({ focus: true });

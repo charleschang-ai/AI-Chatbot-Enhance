@@ -9,19 +9,11 @@ patch(ChatWindow.prototype, {
         }
         return super.computeCanShow();
     },
-    async _onClose() {
+    async _onClose(options) {
         const thread = this.thread;
         if (thread?.ai_agent_id) {
             await rpc("/ai/close_chat_ai", { channel_id: thread.id });
         }
-        await super._onClose(...arguments);
+        // await super._onClose(options);
     },
-    get avatarUrl() {
-        if (this.channel_type === "ai_chat" && this.correspondent) {
-            return this.correspondent.avatarUrl;
-        }
-
-        return super.avatarUrl;
-    },
-
 });

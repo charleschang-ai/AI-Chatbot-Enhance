@@ -12,7 +12,7 @@ class AIControllerTest(ThreadController):
     # 请替换为您自己的 DeepSeek API Key
     DEEPSEEK_API_KEY = 1
 
-    @http.route('/ai/generate_response_test', type="jsonrpc", auth="public")
+    @http.route('/ai/generate_response_test', type="json", auth="public")
     def generate_response_test(self, mail_message_id, channel_id, **kwargs):
         """接收前端发送的消息ID，调用DeepSeek并回复"""
         message = request.env['mail.message'].sudo().browse(int(mail_message_id)).exists()

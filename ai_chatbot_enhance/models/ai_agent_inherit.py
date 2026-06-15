@@ -5,7 +5,6 @@ from odoo.http import request
 import logging
 from odoo.tools.misc import mute_logger, submap
 import json
-from odoo.fields import Domain
 
 _logger = logging.getLogger(__name__)
 
@@ -289,7 +288,7 @@ class AIAgentAdvanced(models.Model):
 
         try:
             domain_array = json.loads(domain_json_str)
-            Domain(domain_array).optimize_full(self.env[model_name])
+            # Domain(domain_array).optimize_full(self.env[model_name])
             return domain_array
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON format for custom domain: {e}")

@@ -1,6 +1,5 @@
 import { Thread } from "@mail/core/common/thread_model";
 import { patch } from "@web/core/utils/patch";
-import { fields } from "@mail/core/common/record";
 import { browser } from "@web/core/browser/browser";
 
 const AI_PROMPT_BUTTONS = "ai.thread.prompt_buttons.";
@@ -8,24 +7,34 @@ const AI_PROMPT_BUTTONS = "ai.thread.prompt_buttons.";
 patch(Thread.prototype, {
     setup() {
         super.setup();
-        this.ai_prompt_buttons = fields.Many("ai.prompt.button", {
-            inverse: "thread_id",
-            compute() {
-                return JSON.parse(browser.localStorage.getItem(AI_PROMPT_BUTTONS.concat(this.id)));
-            },
-        });
+        // this.ai_prompt_buttons = Record.many("ai.prompt.button", {
+        //     inverse: "thread_id",
+        //     compute() {
+        //         return JSON.parse(browser.localStorage.getItem(AI_PROMPT_BUTTONS.concat(this.id)));
+        //     },
+        // });
+        // const stored = localStorage.getItem(AI_PROMPT_BUTTONS.concat(this.props.record.id));
+        // this.ai_prompt_buttons = stored ? JSON.parse(stored) : [];
     },
     async closeChatWindow(options = {}) {
         await super.closeChatWindow(options);
         browser.localStorage.removeItem(AI_PROMPT_BUTTONS.concat(this.id));
     },
-    get avatarUrl() {
-        if (this.channel_type === "ai_chat" && this.correspondent) {
-            return this.correspondent.avatarUrl;
-        }
 
+    get avatarUrl() {
+        if (this.channel_type === "ai_chat" && this.ai_agent_id) {
+            return `/web/image/ai.agent/${this.ai_agent_id}/avatar_128`;
+        }
         return super.avatarUrl;
     },
+
+    // get avatarUrl() {
+    //     if (this.channel_type === "ai_chat" && this.correspondent) {
+    //         return this.correspondent.avatarUrl;
+    //     }
+    //     return super.avatarUrl;
+    // },
+
     computeCorrespondent() {
         const correspondent = super.computeCorrespondent();
         if (

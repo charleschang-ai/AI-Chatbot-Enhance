@@ -4,24 +4,33 @@
         <xpath expr="//div[hasclass('o-mail-Composer-footer')]" position="inside">
 <div class="o-mail-Composer-footer overflow-auto o-scrollbar-thin">
     <t t-if="currentAgentInfo">
-        <div class="ai-cyber-panel d-flex align-items-center gap-2 p-1 mb-2 rounded-3">
+        <!-- 全息投影面板 -->
+        <div class="ai-hologram-panel d-flex align-items-center gap-2 p-1 mb-2 rounded-4">
 
-            <div class="ai-cyber-select-group d-flex align-items-center rounded-2 px-2 py-1">
-                <i class="fa fa-robot ai-neon-glow-green me-2"/>
-                <span class="fw-bold text-gradient-green" style="font-size: 11px;" t-esc="currentAgentInfo.name"/>
+            <!-- Agent 名称区域：全息标签 -->
+            <div class="ai-holo-tag d-flex align-items-center gap-2 px-3 py-1 rounded-pill">
+                <div class="ai-holo-icon">
+                    <i class="fa fa-robot"></i>
+                </div>
+                <span class="ai-holo-text fw-bold" t-esc="currentAgentInfo.name"/>
+                <div class="ai-scan-line"></div>
             </div>
 
-            <div class="ai-cyber-divider"></div>
+            <!-- 动态分隔符：粒子光晕 -->
+            <div class="ai-data-stream"></div>
 
-            <div class="ai-cyber-select-group d-flex align-items-center rounded-2 px-2 py-1">
-                <i class="fa fa-brain ai-neon-glow-purple me-2"/>
-                <span class="font-monospace fw-bold text-gradient-blue" style="font-size: 11px;" t-esc="currentAgentInfo.llm_model"/>
+            <!-- 模型信息区域：全息芯片 -->
+            <div class="ai-holo-chip d-flex align-items-center gap-2 px-3 py-1 rounded-pill">
+                <div class="ai-holo-icon">
+                    <i class="fa fa-microchip"></i>
+                </div>
+                <span class="ai-holo-code font-monospace fw-bold" t-esc="currentAgentInfo.llm_model"/>
+                <div class="ai-pulse-ring"></div>
             </div>
 
         </div>
     </t>
-
-    </div>
+</div>
         </xpath>
     </t>
 </templates>

@@ -102,7 +102,7 @@
                             </div>
                             <div class="button ak-footer px-3 py-2 d-flex justify-content-end align-items-center">
                                 <field name="topic_ids"/>
-                                <button class="ak-action btn btn-outline-danger">Open chat</button>
+                                <button class="ak-action btn btn-outline-success">Ask Ai</button>
                             </div>
                         </div>
                     </t>

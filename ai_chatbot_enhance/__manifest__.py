@@ -5,7 +5,7 @@
 ################################################################################
 {
     'name': 'AI Chatbot Enhance | RAG & Vector Search | Odoo Query & Record Automation',
-    'version': '19.0.1.0.1',
+    'version': '18.0.1.0.1',
     'category': 'Productivity/Discuss',
     'summary': "Key Features:- RAG (Retrieval-Augmented Generation): Elevate AI accuracy by ingesting custom documents and URLs, creating an intelligent corporate knowledge base.- OS & System Automation: Bridge the gap between generative AI and core operations, enabling autonomous task execution and system-level workflows.",
     'description': "A powerful, all-in-one AI orchestration module designed for Odoo. Effortlessly deploy and configure various large AI models while expanding their capabilities with advanced Retrieval-Augmented Generation (RAG) using your own documentation and web URLs. Armed with OS-level integration features, this module goes beyond simple chat, driving intelligent automation, contextual data analysis, and autonomous workflow execution directly within your Odoo environment.",
@@ -31,7 +31,8 @@
     ],
     'assets': {
         'web.assets_backend': [
-            ('after', 'web/static/src/views/form/form_controller.js', 'ai_chatbot_enhance/static/src/web/form_controller_patch.js'),
+            ('after', 'web/static/src/views/form/form_controller.js',
+             'ai_chatbot_enhance/static/src/web/form_controller_patch.js'),
             'ai_chatbot_enhance/static/src/**/*',
             ('remove', 'ai_chatbot_enhance/static/src/web/lazy/**'),
         ],

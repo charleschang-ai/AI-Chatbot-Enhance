@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="ai_menu_root" name="AI Chat" web_icon="ai_chatbot_enhance,static/description/icon.png" sequence="50">
+
+        <menuitem id="ai_agent_menu_action" name="Agents" action="ai_agent_action" sequence="10"/>
+        <menuitem id="menu_ai_composer" name="User Prompts" action="ai_composer_action_custom"
+                  groups="base.group_system" sequence="20"/>
+        <menuitem id="menu_ai_topic" name="AI Tools" action="ai_tools_action" groups="base.group_system"
+                  sequence="30"/>
+        <menuitem id="menu_ai_provider" name="AI Providers" action="action_ai_provider" groups="base.group_system"
+                  sequence="40"/>
+        <menuitem id="ai_general_settings_menu" name="Settings" action="ai_settings_action_custom"
+                  groups="base.group_system" sequence="100"/>
+    </menuitem>
+</odoo>

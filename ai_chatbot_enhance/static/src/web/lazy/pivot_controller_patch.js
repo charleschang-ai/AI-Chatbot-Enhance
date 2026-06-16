@@ -1,3 +1,5 @@
+/** @odoo-module **/
+
 import { PivotController } from "@web/views/pivot/pivot_controller";
 import { patch } from "@web/core/utils/patch";
 import { useBus } from "@web/core/utils/hooks";

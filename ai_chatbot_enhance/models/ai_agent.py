@@ -154,7 +154,7 @@ class AIAgent(models.Model):
         return selection
 
     active = fields.Boolean(default=True)
-    name = fields.Char(string="Agent Name", related='partner_id.name', required=True, readonly=False)
+    name = fields.Char(string="Agent Name", related='partner_id.name', required=True, readonly=False, store=True)
     subtitle = fields.Char(string="Description")
     system_prompt = fields.Text(string="System Prompt", help="Customize to control relevance and formatting.")
     response_style = fields.Selection(
@@ -436,6 +436,7 @@ class AIAgent(models.Model):
         search_domain = [
             ('model', 'in', list(allowed_models)),
             ('transient', '=', False),
+            ('_abstract', '=', False),
         ]
         model_records = self.env["ir.model"].sudo().search(search_domain, order="model")
 
@@ -804,8 +805,7 @@ class AIAgent(models.Model):
             author_id=self.partner_id.id,
             body=formatted_message,
             message_type='comment',
-            silent=True,
-            subtype_xmlid='mail.mt_comment'
+            # subtype_xmlid='mail.mt_comment'
         )
 
     @api.depends("sources_ids.status")

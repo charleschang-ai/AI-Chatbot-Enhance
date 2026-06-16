@@ -1,6 +1,6 @@
 import random
 
-from odoo.addons.mail.tools.discuss import Store
+# from odoo.addons.mail.tools.discuss import Store
 from odoo import _, fields, models, api
 from odoo.exceptions import AccessError
 # from odoo.fields import Domain
@@ -8,6 +8,7 @@ from odoo.exceptions import AccessError
 # from odoo.addons.mail.tools.discuss import Store
 import base64
 from hashlib import sha512
+from datetime import timedelta
 
 channel_avatar = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 530.06 530.06">
 <rect width="530.06" height="530.06" fill="#875a7b"/>
@@ -124,33 +125,20 @@ class DiscussChannel(models.Model):
 
     @api.autovacuum
     def _remove_ai_chat_channels(self):
+        cutoff = fields.Datetime.now() - timedelta(days=1)
         self.sudo().search([
             ('ai_agent_id', '!=', False),
             ('channel_type', '=', 'ai_chat'),
-            ('last_interest_dt', '<', '-1d')
+            ('channel_member_ids.last_interest_dt', '<', cutoff)
         ]).unlink()
 
-    def _to_store(self, store: Store):
-        """确保 ai_agent_id 字段被发送到前端 Store"""
-        super()._to_store(store)
-        # 只对 AI 聊天频道添加 ai_agent_id 字段
-        for channel in self.filtered(lambda c: c.channel_type == 'ai_chat'):
-            store.add(channel, {
-                'ai_agent_id': Store.one(channel.ai_agent_id, only_id=True) if channel.ai_agent_id else False,
-            })
-        return store
-
-    # def _to_store_defaults(self, target):
-    #     defaults = super()._to_store_defaults(target) if hasattr(super(), '_to_store_defaults') else []
-    #     if is_ai_chat_channel(self):
-    #         defaults.append('ai_agent_id')
-    #     return defaults
-    #
-    # def _get_sync_field_names(self):
-    #     field_names = super()._get_sync_field_names() if hasattr(super(), '_get_sync_field_names') else []
-    #     if is_ai_chat_channel(self):
-    #         field_names.append('ai_agent_id')
-    #     return field_names
+    def _channel_info(self):
+        infos = super()._channel_info()
+        by_id = {i['id']: i for i in infos}
+        for channel in self:
+            if channel.id in by_id:
+                by_id[channel.id]['ai_agent_id'] = channel.ai_agent_id.id or False
+        return infos
 
     def _generate_avatar(self):
         if self.channel_type not in ('channel', 'group', 'ai_chat'):

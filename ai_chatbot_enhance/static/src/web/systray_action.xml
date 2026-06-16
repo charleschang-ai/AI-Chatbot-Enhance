@@ -1,72 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="ai.SystrayAction">
-<Dropdown position="'bottom-end'"
-          menuClass="'ai-dropdown-menu-ultra shadow-2xl border-0 rounded-3 p-2 mt-2'"
-          onOpened="() => this.onDropdownOpened()">
+        <Dropdown position="'bottom-end'"
+                  menuClass="'ai-dropdown-menu-ultra shadow border-0 rounded-3 p-2 mt-2'"
+                  togglerClass="'btn d-flex justify-content-center align-items-center o_nav_entry rounded-circle p-2 mx-1 ai-systray-trigger'"
+                  title="'Ask AI'"
+                  beforeOpen="() => this.onDropdownOpened()">
 
-    <button class="btn d-flex justify-content-center align-items-center o_nav_entry rounded-circle p-2 mx-1 ai-systray-trigger"
-            style="transition: all 0.3s;" title="Ask AI">
-        <img class="ai-systray-icon-glow rounded-circle"
-             src="/ai_chatbot_enhance/static/description/icon.jpg" alt="AI"
-             style="width: 28px; height: 28px; object-fit: cover;"/>
-    </button>
-
-    <t t-set-slot="content">
-        <!-- 全新炫彩头部 -->
-        <div class="ai-menu-header d-flex align-items-center px-3 py-2 mb-3 rounded-4">
-            <div class="ai-header-icon me-2">
-                <i class="fa fa-bolt"></i>
+            <t t-set-slot="toggler">
+                <img class="ai-systray-icon-glow rounded-circle"
+                     src="/ai_chatbot_enhance/static/description/icon.jpg" alt="AI"
+                     style="width: 28px; height: 28px; object-fit: cover;"/>
+            </t>
+            
+            <div class="ai-menu-header d-flex align-items-center px-3 py-2 mb-3 rounded-4">
+                <div class="ai-header-icon me-2"><i class="fa fa-bolt"/></div>
+                <span class="ai-header-text">AI AGENTS</span>
+                <div class="ai-header-glow"/>
             </div>
-            <span class="ai-header-text">AI AGENTS</span>
-            <div class="ai-header-glow"></div>
-        </div>
 
-        <!-- Agents 列表（数据循环完全不变） -->
-        <t t-foreach="state.agents" t-as="agent" t-key="agent.id">
-            <DropdownItem class="'ai-menu-item d-flex align-items-center px-3 py-2 rounded-3 mb-2'"
-                          onSelected="() => this.onClickLaunchAIChat(agent)">
+            <t t-foreach="state.agents" t-as="agent" t-key="agent.id">
+                <DropdownItem class="'ai-menu-item d-flex align-items-center px-3 py-2 rounded-3 mb-2'"
+                              onSelected="() => this.onClickLaunchAIChat(agent)">
+                    <div class="ai-item-avatar me-3">
+                        <t t-if="agent.image_128">
+                            <img t-attf-src="/web/image/ai.agent/{{agent.id}}/image_128"
+                                 alt="Agent Avatar" class="ai-avatar-img"/>
+                        </t>
+                        <t t-else="">
+                            <div class="ai-avatar-placeholder"><i class="fa fa-robot"/></div>
+                        </t>
+                        <div class="ai-status-dot"/>
+                    </div>
+                    <div class="ai-item-info d-flex flex-column justify-content-center">
+                        <span class="ai-agent-name fw-bold mb-0" t-esc="agent.name"/>
+                        <span class="ai-model-badge">
+                            <i class="fa fa-microchip me-1"/><span t-esc="agent.llm_model"/>
+                        </span>
+                    </div>
+                    <div class="ai-item-arrow ms-auto"><i class="fa fa-chevron-right"/></div>
+                </DropdownItem>
+            </t>
 
-                <div class="ai-item-avatar me-3">
-                    <t t-if="agent.image_128">
-                        <img t-attf-src="/web/image/ai.agent/{{agent.id}}/image_128"
-                             alt="Agent Avatar"
-                             class="ai-avatar-img"/>
-                    </t>
-                    <t t-else="">
-                        <div class="ai-avatar-placeholder">
-                            <i class="fa fa-robot"></i>
-                        </div>
-                    </t>
-                    <div class="ai-status-dot"></div>
+            <t t-if="state.agents.length === 0">
+                <div class="ai-empty-state px-4 py-5 text-center d-flex flex-column align-items-center">
+                    <div class="ai-empty-icon mb-3"><i class="fa fa-microchip-slash"/></div>
+                    <span class="ai-empty-text">NO AGENT DEPLOYED</span>
+                    <span class="ai-empty-sub mt-1">Connect to hub to activate</span>
                 </div>
-
-                <div class="ai-item-info d-flex flex-column justify-content-center">
-                    <span class="ai-agent-name fw-bold mb-0" t-esc="agent.name"/>
-                    <span class="ai-model-badge">
-                        <i class="fa fa-microchip me-1"></i>
-                        <span t-esc="agent.llm_model"/>
-                    </span>
-                </div>
-
-                <div class="ai-item-arrow ms-auto">
-                    <i class="fa fa-chevron-right"></i>
-                </div>
-
-            </DropdownItem>
-        </t>
-
-        <!-- 空状态（样式同步炫酷） -->
-        <t t-if="state.agents.length === 0">
-            <div class="ai-empty-state px-4 py-5 text-center d-flex flex-column align-items-center">
-                <div class="ai-empty-icon mb-3">
-                    <i class="fa fa-microchip-slash"></i>
-                </div>
-                <span class="ai-empty-text">NO AGENT DEPLOYED</span>
-                <span class="ai-empty-sub mt-1">Connect to hub to activate</span>
-            </div>
-        </t>
-    </t>
-</Dropdown>
+            </t>
+        </Dropdown>
     </t>
 </templates>

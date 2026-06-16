@@ -3,48 +3,45 @@
     <record id="res_config_settings_view_form" model="ir.ui.view">
         <field name="name">res.config.settings.view.form.inherit.ai.chatbot</field>
         <field name="model">res.config.settings</field>
-        <field name="inherit_id" ref="base.res_config_settings_view_form" />
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
         <field name="arch" type="xml">
 
             <xpath expr="//form" position="inside">
                 <app data-string="AI Chatbot" string="AI Chatbot" name="ai_chatbot_enhance">
                     <block title="AI Providers" name="ai_providers">
-                        <setting id="openai_provider" string="OpenAI (ChatGPT)" help="Provide your API key to connect with OpenAI" groups="base.group_system">
-                            <field name="openai_key_enabled" />
-                            <group invisible="not openai_key_enabled">
-                                <div class="flex-grow-1">
-                                    <field name="openai_key" placeholder="sk-..." password="True" nolabel="1" class="w-100"/>
-                                </div>
-                            </group>
+                        <setting id="openai_provider" string="OpenAI (ChatGPT)"
+                                 help="Provide your API key to connect with OpenAI" groups="base.group_system">
+                            <field name="openai_key_enabled"/>
+                            <div class="content-group mt16 w-100" invisible="not openai_key_enabled">
+                                <field name="openai_key" placeholder="sk-..." password="True" nolabel="1"
+                                       class="w-100"/>
+                            </div>
                         </setting>
 
-                        <setting id="google_provider" string="Google Gemini" help="Provide your API key to connect with Google AI" groups="base.group_system">
-                            <field name="google_key_enabled" />
-                            <group invisible="not google_key_enabled">
-                                <div class="flex-grow-1">
-                                    <field name="google_key" placeholder="AIza..." password="True" nolabel="1" class="w-100"/>
-                                </div>
-                            </group>
+                        <setting id="google_provider" string="Google Gemini"
+                                 help="Provide your API key to connect with Google AI" groups="base.group_system">
+                            <field name="google_key_enabled"/>
+                            <div class="content-group mt16 w-100" invisible="not google_key_enabled">
+                                <field name="google_key" placeholder="AIza..." password="True" nolabel="1"
+                                       class="w-100"/>
+                            </div>
                         </setting>
 
-                        <setting id="deepseek_provider" string="DeepSeek" help="Provide your API key to connect with DeepSeek" groups="base.group_system">
-                            <field name="deepseek_key_enabled" />
-                            <group invisible="not deepseek_key_enabled">
-                                <div class="flex-grow-1">
-                                    <field name="deepseek_key" placeholder="sk-..." password="True" nolabel="1" class="w-100"/>
-                                </div>
-                            </group>
+                        <setting id="deepseek_provider" string="DeepSeek"
+                                 help="Provide your API key to connect with DeepSeek" groups="base.group_system">
+                            <field name="deepseek_key_enabled"/>
+                            <div class="content-group mt16 w-100" invisible="not deepseek_key_enabled">
+                                <field name="deepseek_key" placeholder="sk-..." password="True" nolabel="1"
+                                       class="w-100"/>
+                            </div>
                         </setting>
 
                         <setting id="qwen_provider" string="Qwen"
                                  help="Provide your API key to connect with Qwen" groups="base.group_system">
                             <field name="qwen_key_enabled"/>
-                            <group invisible="not qwen_key_enabled">
-                                <div class="flex-grow-1">
-                                    <field name="qwen_key" placeholder="sk-..." password="True" nolabel="1"
-                                           class="w-100"/>
-                                </div>
-                            </group>
+                            <div class="content-group mt16 w-100" invisible="not qwen_key_enabled">
+                                <field name="qwen_key" placeholder="sk-..." password="True" nolabel="1" class="w-100"/>
+                            </div>
                         </setting>
                     </block>
                 </app>

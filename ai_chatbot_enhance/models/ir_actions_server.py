@@ -16,7 +16,8 @@ from ..utils.llm_api_service import LLMApiService
 from ..utils.ai_tools import parse_ai_prompt_values
 from ..utils.tools_schema.validators import validate_params_llm_values_with_schema, validate_schema
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import _, replace_exceptions
+from odoo.tools import replace_exceptions
+from odoo.tools.translate import _
 
 _logger = logging.getLogger(__name__)
 

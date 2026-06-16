@@ -1,45 +1,35 @@
-import logging
-from werkzeug.exceptions import NotFound
 from odoo import http
 from odoo.http import request
-# from odoo.addons.mail.tools.discuss import add_guest_to_context
-# from odoo.addons.mail.controllers.thread import ThreadController
-
-_logger = logging.getLogger(__name__)
+from werkzeug.exceptions import NotFound
 
 
-class AIController(http.Controller):
+class AIChatController(http.Controller):  # 用你原来的类名
 
     @http.route(["/ai/get_ai_response"], type="json", auth="public")
-    # @add_guest_to_context
     def get_ai_response(self, mail_message_id, channel_id, **kwargs):
         channel = self._get_ai_channel_from_id(channel_id)
         if not channel:
             raise NotFound()
-        message = self._get_message_with_access(mail_message_id)
+        message = self._get_message_in_channel(mail_message_id, channel)
         if message:
-            channel.sudo().ai_agent_id.with_context()._get_response_for_channel(message, channel)
+            channel.sudo().ai_agent_id._get_response_for_channel(message, channel)
 
     def _get_ai_channel_from_id(self, channel_id):
-        channel = request.env['discuss.channel'].search([('id', '=', channel_id)])
-        if channel.sudo().ai_agent_id:
+        channel = request.env['discuss.channel'].sudo().browse(int(channel_id)).exists()
+        if channel and channel.ai_agent_id:
             return channel
-        return request.env['discuss.channel']
+        return request.env['discuss.channel'].sudo()
+
+    def _get_message_in_channel(self, message_id, channel):
+        """ 17 没有 _get_with_access：直接 sudo 取消息，
+            并校验它确实属于这个 AI 频道（这是这里有意义的访问校验）。"""
+        message = request.env['mail.message'].sudo().browse(int(message_id)).exists()
+        if message and message.model == 'discuss.channel' and message.res_id == channel.id:
+            return message
+        return request.env['mail.message'].sudo()
 
     @http.route('/ai/close_chat_ai', methods=["POST"], type="json", auth='public')
     def close_ai_chat(self, channel_id):
         channel = self._get_ai_channel_from_id(channel_id)
         if channel and len(channel) < 6:
             channel.sudo().unlink()
-
-    @classmethod
-    def _get_message_with_access(cls, message_id, mode="read", **kwargs):
-        """ Simplified getter that filters access params only, making model methods
-        using strong parameters. """
-        message_su = request.env['mail.message'].sudo().browse(message_id).exists()
-        if not message_su:
-            return message_su
-        return request.env['mail.message']._get_with_access(message_su.id, "read", **{
-                key: value for key, value in kwargs.items()
-                if key in request.env[message_su.model or 'mail.thread'].set()
-            },)

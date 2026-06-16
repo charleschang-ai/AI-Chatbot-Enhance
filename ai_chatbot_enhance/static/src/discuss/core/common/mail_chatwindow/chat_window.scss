@@ -1,0 +1,15 @@
+// 覆盖原有背景色
+/* 聊天窗口：微光银白基底 + 极光青蓝流动渐变（角度动感但不变尺寸） */
+.o-mail-ChatWindow {
+    background: linear-gradient(112deg, #ff5e00 0%, #ffbb00 35%, #ffdd77 100%) !important;
+    box-shadow: 0 0 0 1px rgba(255, 94, 0, 0.4), 0 8px 20px rgba(255, 94, 0, 0.2) !important;
+}
+
+/* 头部：液态金属蓝紫渐变 + 微光边框 */
+.o-mail-ChatWindow-header {
+    background: linear-gradient(135deg, #1e3c72, #2a5298, #6b46c1) !important;
+    background-color: transparent !important;
+    border-bottom: 1px solid rgba(0, 230, 250, 0.6) !important;
+    color: #ffffff !important;
+    text-shadow: 0 0 4px rgba(0, 200, 255, 0.8) !important;
+}

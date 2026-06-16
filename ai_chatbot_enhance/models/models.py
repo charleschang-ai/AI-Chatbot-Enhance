@@ -4,7 +4,7 @@ import pytz
 import json
 
 from odoo import models
-from odoo.api import NewId
+# from odoo.api import NewId
 from odoo.exceptions import AccessError
 from odoo.tools import OrderedSet
 from odoo.tools.mail import html_to_inner_content
@@ -158,8 +158,6 @@ class Model(models.AbstractModel):
                 for vals in vals_list:
                     vals[fname] = html_to_inner_content(vals[fname])
             elif field.type in ('many2many', 'many2one', 'many2one_reference', 'one2many', 'reference'):
-                # can't use result of read because we might have temporary records (with NewId), so
-                # the ids won't be the ids we expect (origin ids or none for virtual records)
                 vals_by_ids = {vals['id']: vals for vals in vals_list}
                 for record in self:
                     record_vals = vals_by_ids[record.id]
@@ -253,9 +251,8 @@ class Model(models.AbstractModel):
             snapshot[model], files_dict = records._ai_read(info['fields'], files_dict)
 
         def _ai_context_json_default(obj):
-            """NewId is not json serializable, use its string representation"""
-            if isinstance(obj, NewId):
-                return obj.origin or str(obj)
+            if hasattr(obj, 'origin') or hasattr(obj, 'ref'):
+                return str(obj)
             return obj
 
         return json.dumps(snapshot, default=_ai_context_json_default, ensure_ascii=False, indent=2), list(files_dict.values())

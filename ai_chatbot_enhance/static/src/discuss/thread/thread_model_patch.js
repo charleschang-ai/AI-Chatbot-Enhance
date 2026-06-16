@@ -1,6 +1,10 @@
-import { Thread } from "@mail/core/common/thread_model";
-import { patch } from "@web/core/utils/patch";
-import { browser } from "@web/core/browser/browser";
+/** @odoo-module **/
+
+import {Thread} from "@mail/core/common/thread_model";
+import {patch} from "@web/core/utils/patch";
+import {browser} from "@web/core/browser/browser";
+import {url} from "@web/core/utils/urls";
+import {assignDefined} from "@mail/utils/common/misc";
 
 const AI_PROMPT_BUTTONS = "ai.thread.prompt_buttons.";
 
@@ -34,6 +38,16 @@ patch(Thread.prototype, {
     //     }
     //     return super.avatarUrl;
     // },
+
+    get imgUrl() {
+        if (this.type === "ai_chat") {
+            return url(
+                `/web/image/discuss.channel/${this.id}/avatar_128`,
+                assignDefined({}, {unique: this.avatarCacheKey})
+            );
+        }
+        return super.imgUrl;
+    },
 
     computeCorrespondent() {
         const correspondent = super.computeCorrespondent();

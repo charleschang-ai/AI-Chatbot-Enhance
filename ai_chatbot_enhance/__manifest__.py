@@ -4,7 +4,7 @@
 #
 ################################################################################
 {
-    'name': 'AI Chatbot Enhance | RAG & Vector Search | Odoo Query & Record Automation',
+    'name': 'AI Chatbot Enhance | RAG & Vector Search | Odoo Query & Record Automation | AI RAG',
     'version': '19.0.1.0.1',
     'category': 'Productivity/Discuss',
     'summary': "Key Features:- RAG (Retrieval-Augmented Generation): Elevate AI accuracy by ingesting custom documents and URLs, creating an intelligent corporate knowledge base.- OS & System Automation: Bridge the gap between generative AI and core operations, enabling autonomous task execution and system-level workflows.",

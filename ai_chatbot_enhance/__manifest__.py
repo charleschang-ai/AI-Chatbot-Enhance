@@ -4,7 +4,7 @@
 #
 ################################################################################
 {
-    'name': 'AI Chatbot Enhance | RAG & Vector Search | Odoo Query & Record Automation | AI RAG',
+    'name': 'AI Chatbot Enhance | RAG & Vector Search | Odoo Query & Record Automation | AI RAG |AI Skills| AI Tools| AI Copilot | AI Assistant for Discuss',
     'version': '19.0.1.0.1',
     'category': 'Productivity/Discuss',
     'summary': "Key Features:- RAG (Retrieval-Augmented Generation): Elevate AI accuracy by ingesting custom documents and URLs, creating an intelligent corporate knowledge base.- OS & System Automation: Bridge the gap between generative AI and core operations, enabling autonomous task execution and system-level workflows.",
@@ -52,6 +52,6 @@
     'installable': True,
     'auto_install': False,
     'application': True,
-    'price': 1200,
+    'price': 420,
     'currency': "USD",
 }

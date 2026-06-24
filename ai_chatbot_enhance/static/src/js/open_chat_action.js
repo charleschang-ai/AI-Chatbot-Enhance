@@ -1,19 +1,21 @@
+/** @odoo-module **/
+
 import { registry } from "@web/core/registry";
 
 async function initChat(env, action) {
-    const store = env.services["mail.store"];
+    const threadService = env.services["mail.thread"];
 
-    const thread = await store.Thread.getOrFetch({
-        model: "discuss.channel",
-        id: Number(action.params.channelId),
-    });
+    // 17 没有 getOrFetch：用 fetchChannel 拉频道（走 /discuss/channel/info 并 insert）
+    const thread = await threadService.fetchChannel(Number(action.params.channelId));
     if (!thread) {
         throw new Error("Thread not found");
     }
-    thread.open({ focus: true });
+    // 17 没有 thread.open()：用 threadService.open（discuss.channel 会开成聊天窗口）
+    threadService.open(thread);
     await thread.isLoadedDeferred;
     if (action.params.user_prompt && thread.status !== "loading") {
-        await thread.post(action.params.user_prompt);
+        // 17 没有 thread.post()：用 threadService.post(thread, body)
+        await threadService.post(thread, action.params.user_prompt);
     }
 }
 

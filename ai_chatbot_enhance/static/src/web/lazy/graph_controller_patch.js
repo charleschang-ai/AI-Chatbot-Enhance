@@ -1,3 +1,5 @@
+/** @odoo-module **/
+
 import { GraphController } from "@web/views/graph/graph_controller";
 import { patch } from "@web/core/utils/patch";
 import { useBus } from "@web/core/utils/hooks";

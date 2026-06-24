@@ -29,23 +29,35 @@
                         margin-right: 5px;
                         vertical-align: middle;
                         }
-
                         .ak-action::after {
                         content: ' →';
                         font-style: normal;
                         }
-
+                        /* 添加一个右上角图标的悬浮效果 */
+                        .ak-settings-icon {
+                        position: absolute;
+                        top: 8px;
+                        right: 8px;
+                        cursor: pointer;
+                        opacity: 0.6;
+                        transition: opacity 0.2s;
+                        z-index: 10;
+                        }
+                        .ak-settings-icon:hover {
+                        opacity: 1;
+                        }
+                        /* 确保卡片容器可以包含绝对定位的图标 */
+                        .ak-card-inner {
+                        position: relative;
+                        background: #fff;
+                        border-radius: 12px;
+                        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+                        }
                     </style>
-                    <t t-name="menu">
-                        <div class="container o_kanban_card_manage_pane">
-                            <div class="o_kanban_card_manage_section">
-                                <a type="open" class="dropdown-item" role="menuitem">Configuration</a>
-                            </div>
-                        </div>
-                    </t>
 
-                    <t t-name="card">
+                    <t t-name="kanban-box">
                         <div class="ak-card-inner d-flex flex-column h-100">
+                            <!-- 设置图标（右上角） -->
 
                             <div class="ak-top d-flex align-items-start gap-3 px-3 pt-3 pb-2">
                                 <div class="ak-avatar flex-shrink-0">
@@ -61,38 +73,33 @@
                                     </h5>
 
                                     <div class="d-flex flex-column gap-1 mt-1">
-
                                         <div>
                                             <span class="badge text-bg-primary">
                                                 <field name="llm_model"/>
                                             </span>
                                         </div>
-
                                         <div>
                                             <span class="badge bg-warning text-primary border">
                                                 <i class="fa fa-sliders me-1" title="response_style"/>
                                                 <field name="response_style"/>
                                             </span>
                                         </div>
-
                                         <div>
-                                            <span class="badge text-bg-success" invisible="restrict_to_sources">
+                                            <span class="badge text-bg-success" invisible="not restrict_to_sources">
                                                 <i class="fa fa-shield me-1" title="Restricted"/>Restricted
                                             </span>
-                                            <span class="badge text-bg-secondary" invisible="not restrict_to_sources">
-                                                <i class="fa fa-shield me-1" title="All sources"/>All sources
+                                            <span class="badge text-bg-secondary" invisible="restrict_to_sources">
+                                                <i class="fa fa-globe me-1" title="All sources"/>All sources
                                             </span>
                                         </div>
-
                                         <div>
-                                            <span class="badge text-bg-dark" invisible="enable_web_search">
+                                            <span class="badge text-bg-dark" invisible="not enable_web_search">
                                                 <i class="fa fa-globe me-1" title="Web on"/>Web on
                                             </span>
-                                            <span class="badge text-bg-dark" invisible="not enable_web_search">
+                                            <span class="badge text-bg-dark" invisible="enable_web_search">
                                                 <i class="fa fa-globe me-1" title="Web off"/>Web off
                                             </span>
                                         </div>
-
                                     </div>
                                 </div>
                             </div>
@@ -101,10 +108,19 @@
                                 <field name="subtitle" class="ak-subtitle text-success bg-light"/>
                             </div>
                             <div class="button ak-footer px-3 py-2 d-flex justify-content-end align-items-center">
-                                <field name="topic_ids"/>
-                                <button class="ak-action btn btn-outline-danger">Open chat</button>
+                                <field name="topic_ids" widget="many2many_tags" class="me-2"/>
+                                <button class="ak-action btn btn-outline-danger">
+                                    Open chat
+                                </button>
                             </div>
+
                         </div>
+                    </t>
+                    <t t-name="kanban-menu">
+                        <a class="ak-settings-icon" type="edit" title="Settings">
+                            <i class="fa fa-gear"/>
+                            Settings
+                        </a>
                     </t>
                 </templates>
             </kanban>
@@ -112,15 +128,15 @@
     </record>
 
     <record id="ai_agent_view_tree" model="ir.ui.view">
-        <field name="name">ai.agent.list</field>
+        <field name="name">ai.agent.tree</field>
         <field name="model">ai.agent</field>
         <field name="arch" type="xml">
-            <list string="Properties">
+            <tree string="Properties">
                 <field name="name" string="Name"/>
                 <field name="subtitle"/>
                 <field name="llm_model"/>
                 <field name="topic_ids" widget="many2many_tags"/>
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -136,6 +152,7 @@
                             type="object"
                             string="Open Chat">
                     </button>
+                    <field name="sources_fully_processed" invisible="1"/>
                     <div invisible="sources_fully_processed" role="status"
                          class="alert alert-warning mb-0 py-2 px-3 w-100 d-flex justify-content-center align-items-center">
                         <div class="d-flex align-items-center">
@@ -154,6 +171,7 @@
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box"/>
+                    <field name="active" invisible="1"/>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <div class="oe_title mb-4 d-flex align-items-center">
                         <field name="image_128" widget="image" class="oe_avatar me-3"
@@ -185,7 +203,7 @@
                     <notebook>
                         <page string="Sources" name="ai_agent_sources">
                             <field name="sources_ids">
-                                <list string="Sources" limit="10" editable="bottom" decoration-muted="not is_active">
+                                <tree string="Sources" limit="10" editable="bottom" decoration-muted="not is_active">
                                     <field name="type" width="25px" nolabel="1"/>
                                     <field name="name"/>
                                     <field name="is_active" widget="boolean_toggle"
@@ -213,7 +231,7 @@
                                                 context="{'agent_id': parent.id}"
                                         />
                                     </control>
-                                </list>
+                                </tree>
                             </field>
                         </page>
                     </notebook>
@@ -250,7 +268,7 @@
     <record id="ai_agent_action" model="ir.actions.act_window">
         <field name="name">Agents</field>
         <field name="res_model">ai.agent</field>
-        <field name="view_mode">kanban,list,form</field>
+        <field name="view_mode">kanban,tree,form</field>
         <field name="search_view_id" ref="ai_agent_view_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

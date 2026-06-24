@@ -1,88 +1,137 @@
-/* 1. 外层面板：流光渐变边框 + 霓虹呼吸阴影 + 科技微暗底色 */
-.ai-cyber-panel {
-    background: #111827 !important; /* 改用高级深暗色背景，只有暗底才能彻底衬托出霓虹发光的鲜艳感！ */
+/* ========== 全息投影容器 ========== */
+.ai-hologram-panel {
+    background: rgba(10, 20, 30, 0.35) !important;
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 255, 255, 0.25);
+    border-radius: 60px;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.1);
     position: relative;
-    max-width: max-content;
-    padding: 3px !important;
-
-    /* 核心：极其华丽的极光渐变边框效果 */
-    border: 1px solid transparent;
-    background-image: linear-gradient(#111827, #111827), linear-gradient(135deg, #00f2fe 0%, #4facfe 40%, #f355da 100%) !important;
-    background-origin: border-box !important;
-    background-clip: padding-box, border-box !important;
-
-    /* 外发光霓虹氛围灯阴影 */
-    box-shadow: 0 0 12px rgba(0, 242, 254, 0.15), 0 0 20px rgba(243, 85, 218, 0.1) !important;
+    overflow: hidden;
 }
 
-/* 2. 内部选项外壳：半透明暗色融合 */
-.ai-cyber-select-group {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+/* 全息扫描线动画（从左上到右下） */
+.ai-hologram-panel::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg,
+        transparent 30%,
+        rgba(0, 255, 255, 0.08) 50%,
+        transparent 70%);
+    transform: rotate(25deg);
+    animation: holoScan 6s linear infinite;
+    pointer-events: none;
 }
 
-/* 悬浮时内部选框边缘亮起 */
-.ai-cyber-select-group:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(0, 242, 254, 0.4);
-    box-shadow: inset 0 0 6px rgba(0, 242, 254, 0.2);
+@keyframes holoScan {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(25deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(25deg); }
 }
 
-/* 3. 极度鲜艳的 Icon 霓虹发光（通过多层复合阴影达到超亮电光效果） */
-.ai-neon-glow-green {
-    color: #00ffcc !important; /* 荧光青绿 */
-    font-size: 13px;
-    text-shadow: 0 0 4px #00ffcc, 0 0 10px rgba(0, 255, 204, 0.6), 0 0 20px rgba(0, 255, 204, 0.3);
-    animation: ai-cyber-pulse 1.5s infinite alternate;
+/* 每个全息标签卡片 */
+.ai-holo-tag, .ai-holo-chip {
+    background: rgba(0, 20, 40, 0.6);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(0, 255, 255, 0.5);
+    box-shadow: 0 0 12px rgba(0, 255, 255, 0.3), inset 0 0 4px rgba(0, 255, 255, 0.2);
+    transition: all 0.2s ease-out;
+    position: relative;
+    z-index: 2;
 }
 
-.ai-neon-glow-purple {
-    color: #ff007f !important; /* 爆裂霓虹紫红 */
-    font-size: 13px;
-    text-shadow: 0 0 4px #ff007f, 0 0 10px rgba(255, 0, 127, 0.6), 0 0 20px rgba(255, 0, 127, 0.3);
-    animation: ai-cyber-pulse 1.5s infinite alternate-reverse; /* 交错呼吸，更显生动 */
+.ai-holo-tag:hover, .ai-holo-chip:hover {
+    transform: scale(1.02) translateY(-1px);
+    border-color: #0ff;
+    box-shadow: 0 0 20px cyan, inset 0 0 8px cyan;
+    background: rgba(0, 40, 60, 0.8);
 }
 
-/* 4. 极致鲜艳的文本颜色 */
-.text-gradient-green {
-    color: #00f2fe !important; /* 激光电青色文字 */
-    text-shadow: 0 0 2px rgba(0, 242, 254, 0.5);
+/* 图标全息发光 */
+.ai-holo-icon i {
+    font-size: 14px;
+    color: #0ff;
+    text-shadow: 0 0 6px #0ff, 0 0 12px rgba(0, 255, 255, 0.5);
+    animation: holoPulse 1.2s infinite alternate;
 }
 
-.text-gradient-blue {
-    color: #ff99dd !important; /* 芭比迷幻粉紫文字（配合大脑非常赛博朋克），或者改成纯鲜艳黄 #ffd200 */
-    text-shadow: 0 0 2px rgba(255, 153, 221, 0.5);
+@keyframes holoPulse {
+    0% { text-shadow: 0 0 2px cyan, 0 0 4px cyan; }
+    100% { text-shadow: 0 0 8px cyan, 0 0 16px cyan; }
 }
 
-/* 5. 清除原生垃圾白底的 Select 控件 */
-.ai-cyber-select {
-    border: none !important;
-    outline: none !important;
-    background: transparent !important;
+/* 文本样式：全息切割效果 */
+.ai-holo-text {
+    color: #d0f0ff;
+    font-size: 12px;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, #fff, #0ff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 4px rgba(0, 255, 255, 0.5);
+}
+
+.ai-holo-code {
+    color: #f0f;
     font-size: 11px;
-    padding-right: 4px;
-    cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
+    background: linear-gradient(135deg, #f0f, #0ff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
-/* 展开下拉菜单时的暗色选项背景（防止下拉出来的面板被浏览器默认渲染成惨白破坏美感） */
-.ai-option-dark {
-    background-color: #1f2937 !important;
-    color: #ffffff !important;
+/* 动态扫描线（在标签内部游走） */
+.ai-scan-line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, cyan, transparent);
+    animation: lineMove 2.5s linear infinite;
+    opacity: 0.6;
 }
 
-/* 中间高能能量阻断线 */
-.ai-cyber-divider {
-    width: 1px;
-    height: 14px;
-    background: linear-gradient(to bottom, transparent, #00f2fe, transparent);
-    opacity: 0.7;
+@keyframes lineMove {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
 }
 
-/* 动力学高频呼吸动画 */
-@keyframes ai-cyber-pulse {
-    0% { transform: scale(0.96); filter: brightness(0.9); }
-    100% { transform: scale(1.04); filter: brightness(1.2); }
+/* 脉冲光环 */
+.ai-pulse-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120%;
+    height: 120%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 1px solid rgba(255, 0, 255, 0.6);
+    animation: ringPulse 1.8s infinite;
+    pointer-events: none;
+}
+
+@keyframes ringPulse {
+    0% { width: 100%; height: 100%; opacity: 0.8; border-width: 2px; }
+    100% { width: 140%; height: 140%; opacity: 0; border-width: 0px; }
+}
+
+/* 数据流分隔符 */
+.ai-data-stream {
+    width: 30px;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, cyan, magenta 8px, transparent 10px);
+    position: relative;
+    animation: streamFlow 0.8s linear infinite;
+}
+
+@keyframes streamFlow {
+    0% { background-position: 0 0; }
+    100% { background-position: 20px 0; }
 }

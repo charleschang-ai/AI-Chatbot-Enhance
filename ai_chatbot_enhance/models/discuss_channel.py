@@ -1,12 +1,14 @@
 import random
 
+# from odoo.addons.mail.tools.discuss import Store
 from odoo import _, fields, models, api
 from odoo.exceptions import AccessError
-from odoo.fields import Domain
+# from odoo.fields import Domain
 
-from odoo.addons.mail.tools.discuss import Store
+# from odoo.addons.mail.tools.discuss import Store
 import base64
 from hashlib import sha512
+from datetime import timedelta
 
 channel_avatar = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 530.06 530.06">
 <rect width="530.06" height="530.06" fill="#875a7b"/>
@@ -49,10 +51,13 @@ class DiscussChannel(models.Model):
     ai_env_context = fields.Json("Context for AI agent")
     # ai_agent_id = fields.Many2one("ai.agent", index="btree_not_null", groups=fields.NO_ACCESS)
     ai_agent_id = fields.Many2one("ai.agent", index="btree_not_null")
-    _ai_channel_type_check = models.Constraint(
-        "CHECK(ai_agent_id IS NULL or channel_type = 'ai_chat' or channel_type = 'livechat')",
-        'AI Agent can only be set for ai_chat or livechat channels.',
-    )
+    _sql_constraints = [
+        (
+            'check_ai_agent_channel_type',
+            "CHECK( ai_agent_id IS NULL OR channel_type IN ('ai_chat', 'livechat') )",
+            'AI Agent can only be set for ai_chat or livechat channels.',
+        )
+    ]
 
     @api.model
     def create_ai_draft_channel(self, caller_component, channel_title=None, record_model=None, record_id=None,
@@ -103,28 +108,37 @@ class DiscussChannel(models.Model):
             prompts = [p for p in prompts if p not in chatter_prompts]
         random_prompts = random.sample(prompts, min(7, len(prompts)))
 
+        channel_data = channel.sudo().read(['id', 'name', 'channel_type', 'ai_agent_id', 'uuid', 'avatar_128'])
+        data = {channel._name: channel_data}
+
+        if channel.ai_agent_id:
+            agent = channel.ai_agent_id.sudo()
+            agent_data = agent.read(['id', 'name'])
+            data[agent._name] = agent_data
+
         return {
             "ai_channel_id": channel.id,
-            "data": Store().add(channel).get_result(),
+            "data": data,
             "prompts": [prompt.name for prompt in random_prompts],
             "model_has_thread": model_has_thread,
         }
 
     @api.autovacuum
     def _remove_ai_chat_channels(self):
-        self.sudo().search(
-            Domain("ai_agent_id", "!=", False)
-            & Domain('channel_type', '=', 'ai_chat')
-            & Domain('last_interest_dt', '<', '-1d')
-        ).unlink()
+        cutoff = fields.Datetime.now() - timedelta(days=1)
+        self.sudo().search([
+            ('ai_agent_id', '!=', False),
+            ('channel_type', '=', 'ai_chat'),
+            ('channel_member_ids.last_interest_dt', '<', cutoff)
+        ]).unlink()
 
-    def _to_store_defaults(self, target):
-        return super()._to_store_defaults(target) + [Store.One("ai_agent_id", predicate=is_ai_chat_channel, sudo=True)]
-
-    def _sync_field_names(self):
-        field_names = super()._sync_field_names()
-        field_names[None].append(Store.One("ai_agent_id", predicate=is_ai_chat_channel, sudo=True))
-        return field_names
+    def _channel_info(self):
+        infos = super()._channel_info()
+        by_id = {i['id']: i for i in infos}
+        for channel in self:
+            if channel.id in by_id:
+                by_id[channel.id]['ai_agent_id'] = channel.ai_agent_id.id or False
+        return infos
 
     def _generate_avatar(self):
         if self.channel_type not in ('channel', 'group', 'ai_chat'):

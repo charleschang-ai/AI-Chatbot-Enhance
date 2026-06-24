@@ -4,8 +4,8 @@
 #
 ################################################################################
 {
-    'name': 'AI Chatbot Enhance | RAG & Vector Search | Odoo Query & Record Automation',
-    'version': '19.0.1.0.1',
+    'name': 'AI Chatbot Enhance | RAG & Vector Search | Odoo Query & Record Automation | AI RAG |AI Skills| AI Tools| AI Copilot | AI Assistant for Discuss',
+    'version': '17.0.1.0.1',
     'category': 'Productivity/Discuss',
     'summary': "Key Features:- RAG (Retrieval-Augmented Generation): Elevate AI accuracy by ingesting custom documents and URLs, creating an intelligent corporate knowledge base.- OS & System Automation: Bridge the gap between generative AI and core operations, enabling autonomous task execution and system-level workflows.",
     'description': "A powerful, all-in-one AI orchestration module designed for Odoo. Effortlessly deploy and configure various large AI models while expanding their capabilities with advanced Retrieval-Augmented Generation (RAG) using your own documentation and web URLs. Armed with OS-level integration features, this module goes beyond simple chat, driving intelligent automation, contextual data analysis, and autonomous workflow execution directly within your Odoo environment.",
@@ -31,19 +31,20 @@
     ],
     'assets': {
         'web.assets_backend': [
+            # 'ai_chatbot_enhance/static/src/**/*',
             ('after', 'web/static/src/views/form/form_controller.js', 'ai_chatbot_enhance/static/src/web/form_controller_patch.js'),
             'ai_chatbot_enhance/static/src/**/*',
-            ('remove', 'ai_chatbot_enhance/static/src/web/lazy/**'),
+            # ('remove', 'ai_chatbot_enhance/static/src/web/lazy/**'),
         ],
-        'web.assets_backend_lazy': [
-            'ai_chatbot_enhance/static/src/web/lazy/*',
-        ],
+        # 'web.assets_backend_lazy': [
+        #     'ai_chatbot_enhance/static/src/web/lazy/*',
+        # ],
         'mail.assets_public': [
             'ai_chatbot_enhance/static/src/discuss/core/common/**/*',
         ],
-        'portal.assets_chatter_helpers': [
-            'ai_chatbot_enhance/static/src/discuss/core/common/**/*',
-        ],
+        # 'portal.assets_chatter_helpers': [
+        #     'ai_chatbot_enhance/static/src/discuss/core/common/**/*',
+        # ],
     },
     'images': ['static/description/icon.jpg'],
     'pre_init_hook': '_pre_init_ai',
@@ -52,6 +53,6 @@
     'installable': True,
     'auto_install': False,
     'application': True,
-    'price': 1200,
+    'price': 520,
     'currency': "USD",
 }

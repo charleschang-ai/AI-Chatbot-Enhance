@@ -8,7 +8,7 @@ from lxml import html
 from urllib.robotparser import RobotFileParser
 from urllib.parse import urlparse
 
-from odoo.tools.urls import urljoin
+from urllib.parse import urljoin
 
 _logger = logging.getLogger(__name__)
 

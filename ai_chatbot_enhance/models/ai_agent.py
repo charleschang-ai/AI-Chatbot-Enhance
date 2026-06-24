@@ -8,7 +8,6 @@ from collections import defaultdict
 from lxml import etree
 
 from odoo import api, fields, models, Command, _
-from odoo.fields import Domain
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import file_open
 from odoo.tools.misc import mute_logger, submap
@@ -155,7 +154,7 @@ class AIAgent(models.Model):
         return selection
 
     active = fields.Boolean(default=True)
-    name = fields.Char(string="Agent Name", related='partner_id.name', required=True, readonly=False)
+    name = fields.Char(string="Agent Name", related='partner_id.name', required=True, readonly=False, store=True)
     subtitle = fields.Char(string="Description")
     system_prompt = fields.Text(string="System Prompt", help="Customize to control relevance and formatting.")
     response_style = fields.Selection(
@@ -277,10 +276,10 @@ class AIAgent(models.Model):
         return channel
 
     def _get_ai_chat_channel(self):
-        channels = self.env['discuss.channel'].search(Domain([
+        channels = self.env['discuss.channel'].search([
             ('is_member', '=', True),
             ('channel_type', '=', 'ai_chat'),
-        ]))
+        ])
         return channels.filtered(lambda channel: channel.sudo().ai_agent_id == self)[:1]
 
     def _create_ai_chat_channel(self, channel_name=None):
@@ -434,11 +433,11 @@ class AIAgent(models.Model):
         allowed_models = self.env["ir.model.access"]._get_allowed_models(mode="read")
 
         # Get ir.model records for allowed models, excluding abstract and transient
-        search_domain = (
-            Domain("model", "in", list(allowed_models))
-            & Domain("transient", "=", False)
-            & Domain("abstract", "=", False)
-        )
+        search_domain = [
+            ('model', 'in', list(allowed_models)),
+            ('transient', '=', False),
+            ('_abstract', '=', False),
+        ]
         model_records = self.env["ir.model"].sudo().search(search_domain, order="model")
 
         # Get app ordering from web menus
@@ -728,7 +727,7 @@ class AIAgent(models.Model):
         if not self.env.user._is_public():
             partner_vals, _ = self.env.user.partner_id._ai_read(['name', 'function', 'email', 'phone'], None)
             system_content += f"\n\nUser info: {partner_vals}"
-        system_content += f"\nAll record data timestamps are in UTC. In responses, convert them to {self.env.tz}"
+        system_content += f"\nAll record data timestamps are in UTC. In responses, convert them to {self.env.user.tz or 'UTC'}"
 
         if self.topic_ids:
             system_content += PREPROMPTS['tools']
@@ -806,8 +805,7 @@ class AIAgent(models.Model):
             author_id=self.partner_id.id,
             body=formatted_message,
             message_type='comment',
-            silent=True,
-            subtype_xmlid='mail.mt_comment'
+            # subtype_xmlid='mail.mt_comment'
         )
 
     @api.depends("sources_ids.status")

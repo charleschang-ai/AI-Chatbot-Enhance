@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="mail.Thread" t-inherit-mode="extension">
+        <!-- 17 里目标是这个 t-elif 节点，不是 empty-message -->
+        <xpath expr="//div[hasclass('o-mail-Thread-empty')]//t[@t-elif='props.showEmptyMessage']" position="replace">
+            <t t-elif="props.showEmptyMessage">
+                <t t-if="showStartMessage">
+                    <div class="o-ai-chat-welcome mx-3 my-4 p-4 bg-light rounded-4 shadow-sm"
+                         style="border: 1px solid rgba(0,0,0,0.05);">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="flex-shrink-0">
+                                <img t-if="!props.thread.parent_channel_id"
+                                     class="rounded-circle object-fit-cover"
+                                     t-att-src="'/web/image/discuss.channel/' + props.thread.id + '/avatar_128?unique=' + (props.thread.avatarCacheKey || '')"
+                                     alt="Thread Image"
+                                     style="width: 56px; height: 56px; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"/>
+                                <i t-else="" class="fa fa-comments-o fa-3x text-primary" role="presentation"/>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="rounded-4 p-3"
+                                     style="background: rgba(255,255,255,0.7); backdrop-filter: blur(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                                    <div class="display-6 fw-bold mb-2"
+                                         style="background: linear-gradient(135deg, #3b82f6, #a855f7); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 2px 4px rgba(0,0,0,0.05);"
+                                         t-esc="startMessageTitle"/>
+                                    <div class="fs-5 fw-semibold" style="color: #ec489a;" t-esc="startMessageSubtitle"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div t-if="aiState.promptButtons.length > 0" class="mt-3">
+                            <div class="cool-prompt-buttons-container">
+                                <t t-foreach="aiState.promptButtons" t-as="button" t-key="button.id">
+                                    <button class="btn cool-prompt-btn rounded-pill px-3 py-1"
+                                            t-on-click="() => onClickPromptButton(button)">
+                                        <i class="fa fa-commenting-o me-1"/>
+                                        <span t-esc="button.text"/>
+                                    </button>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+                <t t-else="">
+                     <div class="o-mail-Thread-empty d-flex flex-column align-items-center justify-content-center text-muted fst-italic h-100"
+                          t-att-class="{'p-4': props.showEmptyMessage}">
+                <t t-if="props.thread.isLoaded">
+                    <t t-if="props.thread.isEmpty and props.thread.type === 'mailbox'">
+                    <t t-if="props.thread.id === 'inbox'">
+                        <h4 class="mb-3 fw-bolder">
+                            Congratulations, your inbox is empty
+                        </h4>
+                        New messages appear here.
+                    </t>
+                        <t t-if="props.thread.id === 'starred'">
+                        <h4 class="mb-3 fw-bolder">
+                            No starred messages
+                        </h4>
+                            You can mark any message as 'starred', and it shows up in this mailbox.
+                    </t>
+                        <t t-if="props.thread.id === 'history'">
+                        <img src="/web/static/img/neutral_face.svg" alt="History"/>
+                            <h4 class="mb-3 fw-bolder">
+                            No history messages
+                        </h4>
+                            Messages marked as read will appear in the history.
+                    </t>
+                    </t>
+                    <t t-elif="props.showEmptyMessage">
+                        There are no messages in this conversation.
+                    </t>
+                </t>
+            </div>
+                </t>
+            </t>
+        </xpath>
+    </t>
+</templates>

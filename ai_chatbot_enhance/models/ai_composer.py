@@ -41,3 +41,12 @@ class AIComposer(models.Model):
             for composer, vals in zip(self, vals_list):
                 vals['name'] = _("%s (copy)", composer.name)
         return vals_list
+
+    @api.model
+    def get_prompts_by_agent(self, agent_id):
+        """根据 ai_agent_id 返回提示按钮列表 [{id, text}]"""
+        composer = self.search([('ai_agent', '=', agent_id)], limit=1)
+        if not composer:
+            return []
+        buttons = composer.available_prompts.sorted('sequence')
+        return [{'id': btn.id, 'text': btn.name} for btn in buttons]

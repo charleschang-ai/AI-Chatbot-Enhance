@@ -1,3 +1,5 @@
+/** @odoo-module **/
+
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
@@ -198,9 +200,6 @@ export const aiNaturalLanguageService = {
                         return error;
                     }
                 }
-                // switch view before applying the changes to the search bar because switching view
-                // will rerender the action container with the search bar. Any search bar changes from the
-                // previous action container won't be reflected if we don't wait for the new view.
                 const error = await trySwitchView();
                 if (!error) {
                     env.bus.trigger("APPLY_AI_ADJUST_SEARCH", {

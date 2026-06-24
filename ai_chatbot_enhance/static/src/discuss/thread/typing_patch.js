@@ -1,3 +1,5 @@
+/** @odoo-module **/
+
 import {patch} from "@web/core/utils/patch";
 import {Typing} from "@mail/discuss/typing/common/typing";
 import {_t} from "@web/core/l10n/translation";

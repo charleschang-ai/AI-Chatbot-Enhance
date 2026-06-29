@@ -7,8 +7,26 @@
                   groups="base.group_system" sequence="20"/>
         <menuitem id="menu_ai_topic" name="AI Tools" action="ai_tools_action" groups="base.group_system"
                   sequence="30"/>
+        <menuitem id="menu_ai_actions" name="AI Skills" action="ai_actions_server_action" groups="base.group_system"
+                  sequence="35"/>
         <menuitem id="menu_ai_provider" name="AI Providers" action="action_ai_provider" groups="base.group_system"
                   sequence="40"/>
+
+        <menuitem id="menu_ai_studio" name="AI Studio" groups="base.group_system" sequence="50">
+            <menuitem id="menu_ai_studio_fields"
+                      name="Custom Fields"
+                      action="action_ai_studio_custom_fields"
+                      sequence="10"/>
+            <menuitem id="menu_ai_studio_views"
+                      name="Custom Views"
+                      action="action_ai_studio_custom_views"
+                      sequence="20"/>
+            <menuitem id="menu_ai_studio_menus"
+                      name="Custom Menus"
+                      action="action_ai_studio_custom_menus"
+                      sequence="30"/>
+        </menuitem>
+
         <menuitem id="ai_general_settings_menu" name="Settings" action="ai_settings_action_custom"
                   groups="base.group_system" sequence="100"/>
     </menuitem>

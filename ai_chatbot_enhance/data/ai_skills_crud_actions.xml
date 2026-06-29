@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="ai_action_get_model_fields" model="ir.actions.server">
+        <field name="name">AI Skill: Get Model Fields</field>
+        <field name="state">code</field>
+        <field name="use_in_ai" eval="True"/>
+        <field name="ai_tool_allow_end_message" eval="False"/>
+        <field name="model_id" ref="model_ai_agent"/>
+        <field name="ai_tool_description">Returns field definitions for any Odoo model.
+Call this BEFORE creating or updating records to know:
+- Which fields are required (must be provided)
+- Field types (char, many2one, selection, boolean, etc.)
+- Available options for selection fields
+- Related models for many2one fields
+
+Use when the user wants to create or update a record and you need to know the correct field names and required fields.
+
+Returns: required_fields (must provide) and optional_fields (common ones).</field>
+        <field name="ai_tool_schema">{
+    "type": "object",
+    "properties": {
+        "model_name": {
+            "type": "string",
+            "description": "Odoo technical model name, e.g. res.partner, sale.order, crm.lead, project.task, hr.employee"
+        }
+    },
+    "required": ["model_name"]
+}</field>
+        <field name="code">if model_name not in env:
+    ai['result'] = f"ERROR: Model '{model_name}' does not exist in Odoo."
+else:
+    fields = env[model_name].sudo().fields_get(
+        attributes=['string', 'type', 'required', 'selection', 'relation', 'help']
+    )
+
+    SKIP_FIELDS = {
+        'id', 'create_uid', 'create_date', 'write_uid', 'write_date',
+        'message_ids', 'message_follower_ids', 'activity_ids',
+        '__last_update', 'display_name', 'access_token',
+    }
+    SKIP_TYPES = {'one2many', 'binary', 'reference'}
+
+    required_lines = []
+    optional_lines = []
+
+    for fname, fdef in fields.items():
+        if fname in SKIP_FIELDS:
+            continue
+        if fdef['type'] in SKIP_TYPES:
+            continue
+
+        line = f"  {fname} | {fdef['string']} | {fdef['type']}"
+        if fdef['type'] == 'many2one':
+            line += f" -&gt; {fdef.get('relation', '')} | use name_fields"
+        if fdef['type'] == 'selection':
+            opts = [str(v) for v, _ in (fdef.get('selection') or [])]
+            line += f" | options: [{', '.join(opts)}]"
+
+        if fdef.get('required'):
+            required_lines.append(line)
+        elif len(optional_lines) &lt; 20:
+            optional_lines.append(line)
+
+    output = f"Model: {model_name}\nFormat: field_name | label | type | notes\n"
+    output += "\nREQUIRED FIELDS (must provide):\n"
+    output += "\n".join(required_lines) if required_lines else "  (none)"
+    output += "\n\nCOMMON OPTIONAL FIELDS:\n"
+    output += "\n".join(optional_lines) if optional_lines else "  (none)"
+
+    ai['result'] = output</field>
+    </record>
+
+    <record id="ai_action_create_record" model="ir.actions.server">
+        <field name="name">AI Skill: Create Record</field>
+        <field name="state">code</field>
+        <field name="use_in_ai" eval="True"/>
+        <field name="ai_tool_allow_end_message" eval="False"/>
+        <field name="model_id" ref="model_ai_agent"/>
+        <field name="ai_tool_description">Creates a new record in any Odoo model.
+
+ALWAYS call "AI: Get Model Fields" first to know required fields and types.
+
+Use when the user says: "create", "add", "new", "register".
+Examples: "create a contact", "add a customer", "create a lead", "add a new employee".
+
+For Many2one fields (country, user, company, etc.): pass the name in name_fields, NOT in values.
+For Selection fields: use the exact option key returned by Get Model Fields.
+
+Returns: record ID and name on success, or error with details on failure.</field>
+        <field name="ai_tool_schema">{
+    "type": "object",
+    "properties": {
+        "model_name": {
+            "type": "string",
+            "description": "Odoo technical model name, e.g. res.partner, crm.lead, project.task"
+        },
+        "field_names": {
+            "type": "array",
+            "description": "List of Odoo technical field names to set. Must match field_values by index. E.g. ['name', 'email', 'phone', 'is_company']",
+            "items": {"type": "string"}
+        },
+        "field_values": {
+            "type": "array",
+            "description": "List of values corresponding to field_names. Same order and length. All as strings: booleans as 'true'/'false', numbers as '1'/'0'. E.g. ['John', 'john@test.com', '123456', 'false']",
+            "items": {"type": "string"}
+        },
+        "many2one_field_names": {
+            "type": "array",
+            "description": "List of Many2one field names where you only have a display name (system will resolve to ID). E.g. ['country_id', 'user_id']",
+            "items": {"type": "string"}
+        },
+        "many2one_search_names": {
+            "type": "array",
+            "description": "List of display names to search for, matching many2one_field_names by index. E.g. ['Hong Kong', 'Administrator']",
+            "items": {"type": "string"}
+        }
+    },
+    "required": ["model_name", "field_names", "field_values", "many2one_field_names", "many2one_search_names"]
+}</field>
+        <field name="code">if model_name not in env:
+    ai['result'] = f"ERROR: Model '{model_name}' does not exist."
+else:
+    all_fields = env[model_name].sudo().fields_get(
+        attributes=['string', 'type', 'required', 'relation']
+    )
+
+    # ── Zip field_names + field_values into dict, auto-cast type ──
+    vals = {}
+    bad_fields = []
+    for fname, fval in zip(field_names or [], field_values or []):
+        if fname not in all_fields:
+            bad_fields.append(fname)
+            continue
+        ftype = all_fields[fname]['type']
+        if ftype == 'boolean':
+            vals[fname] = fval.lower() in ('true', '1', 'yes')
+        elif ftype == 'integer':
+            vals[fname] = int(fval) if fval.lstrip('-').isdigit() else fval
+        elif ftype in ('float', 'monetary'):
+            vals[fname] = float(fval)
+        else:
+            vals[fname] = fval
+
+    if bad_fields:
+        ai['result'] = (
+            f"ERROR: Unknown fields for {model_name}: {bad_fields}\n"
+            f"Call 'AI: Get Model Fields' first to see valid field names."
+        )
+    else:
+        # ── Check required fields ──
+        SYSTEM_FIELDS = {'id', 'create_uid', 'write_uid', 'create_date', 'write_date', 'active'}
+        m2o_keys = list(many2one_field_names or [])
+        missing = [
+            f"{f} ({all_fields[f]['string']}, {all_fields[f]['type']})"
+            for f, d in all_fields.items()
+            if d.get('required')
+            and f not in SYSTEM_FIELDS
+            and f not in vals
+            and f not in m2o_keys
+        ]
+        if missing:
+            ai['result'] = (
+                f"ERROR: Missing required fields for {model_name}:\n"
+                + "\n".join(f"  - {m}" for m in missing)
+                + "\nPlease provide these fields and try again."
+            )
+        else:
+            # ── Resolve many2one names to IDs ──
+            resolve_error = None
+            for fname, search_name in zip(many2one_field_names or [], many2one_search_names or []):
+                if not fname or not search_name:
+                    continue
+                if fname not in all_fields:
+                    resolve_error = f"ERROR: Field '{fname}' not found in {model_name}."
+                    break
+                related_model = all_fields[fname].get('relation')
+                if not related_model:
+                    resolve_error = f"ERROR: '{fname}' is not a Many2one field."
+                    break
+                found = env[related_model].sudo().search(
+                    [['name', 'ilike', search_name]], limit=1
+                )
+                if not found:
+                    resolve_error = f"ERROR: Cannot find '{search_name}' in {related_model}."
+                    break
+                vals[fname] = found.id
+
+            if resolve_error:
+                ai['result'] = resolve_error
+            else:
+                record = env[model_name].sudo().create(vals)
+                ai['result'] = (
+                    f"Created {model_name} record successfully.\n"
+                    f"  ID: {record.id}\n"
+                    f"  Name: {record.display_name}"
+                )</field>
+    </record>
+
+    <record id="ai_action_update_record" model="ir.actions.server">
+        <field name="name">AI Skill: Update Record</field>
+        <field name="state">code</field>
+        <field name="use_in_ai" eval="True"/>
+        <field name="ai_tool_allow_end_message" eval="False"/>
+        <field name="model_id" ref="model_ai_agent"/>
+        <field name="ai_tool_description">Updates fields on an existing Odoo record.
+
+Use when the user says: "update", "change", "edit", "set", "modify".
+Examples: "change John's email to john@new.com", "update the phone number of Acme Corp".
+
+If you don't have the record ID, use AI: Search first to find it.
+
+Provide either record_id (preferred) or search_name to identify the record.
+Returns: confirmation with updated field names on success.</field>
+        <field name="ai_tool_schema">{
+    "type": "object",
+    "properties": {
+        "model_name": {
+            "type": "string",
+            "description": "Odoo technical model name, e.g. res.partner, crm.lead, project.task"
+        },
+        "record_id": {
+            "type": "number",
+            "description": "Database ID of the record to update. Use 0 if searching by name instead."
+        },
+        "search_name": {
+            "type": "string",
+            "description": "Name to search for the record if record_id is 0. Leave empty string if using record_id."
+        },
+        "field_names": {
+            "type": "array",
+            "description": "List of Odoo technical field names to update. Must match field_values by index.",
+            "items": {"type": "string"}
+        },
+        "field_values": {
+            "type": "array",
+            "description": "List of new values corresponding to field_names. Same order and length. All as strings.",
+            "items": {"type": "string"}
+        }
+    },
+    "required": ["model_name", "record_id", "search_name", "field_names", "field_values"]
+}</field>
+        <field name="code">if model_name not in env:
+    ai['result'] = f"ERROR: Model '{model_name}' does not exist."
+elif not field_names:
+    ai['result'] = "ERROR: No field_names provided to update."
+else:
+    all_fields = env[model_name].sudo().fields_get(
+        attributes=['string', 'type']
+    )
+
+    # ── Zip field_names + field_values into dict, auto-cast type ──
+    vals = {}
+    bad_fields = []
+    for fname, fval in zip(field_names, field_values or []):
+        if fname not in all_fields:
+            bad_fields.append(fname)
+            continue
+        ftype = all_fields[fname]['type']
+        if ftype == 'boolean':
+            vals[fname] = fval.lower() in ('true', '1', 'yes')
+        elif ftype == 'integer':
+            vals[fname] = int(fval) if fval.lstrip('-').isdigit() else fval
+        elif ftype in ('float', 'monetary'):
+            vals[fname] = float(fval)
+        else:
+            vals[fname] = fval
+
+    if bad_fields:
+        ai['result'] = (
+            f"ERROR: Unknown fields: {bad_fields}\n"
+            f"Call 'AI: Get Model Fields' to see valid field names."
+        )
+    else:
+        target = None
+        if record_id:
+            target = env[model_name].sudo().browse(int(record_id))
+            if not target.exists():
+                ai['result'] = f"ERROR: No record with ID {record_id} in {model_name}."
+                target = None
+        elif search_name:
+            target = env[model_name].sudo().search(
+                [['name', 'ilike', search_name]], limit=1
+            )
+            if not target:
+                ai['result'] = f"ERROR: Cannot find '{search_name}' in {model_name}."
+                target = None
+        else:
+            ai['result'] = "ERROR: Provide either record_id or search_name."
+
+        if target:
+            target.write(vals)
+            ai['result'] = (
+                f"Updated {model_name} record successfully.\n"
+                f"  ID: {target.id}\n"
+                f"  Name: {target.display_name}\n"
+                f"  Updated fields: {field_names}"
+            )</field>
+    </record>
+
+    <record id="ai_action_archive_record" model="ir.actions.server">
+        <field name="name">AI Skill: Archive Record</field>
+        <field name="state">code</field>
+        <field name="use_in_ai" eval="True"/>
+        <field name="ai_tool_allow_end_message" eval="False"/>
+        <field name="model_id" ref="model_ai_agent"/>
+        <field name="ai_tool_description">Archives (soft-deletes) an existing Odoo record by setting active=False.
+
+Use when the user says: "delete", "remove", "archive", "deactivate".
+Examples: "delete contact Test123", "archive this lead", "remove employee John".
+
+Note: This archives the record (hides it), not permanently deletes it.
+If you don't have the record ID, use AI: Search first to find it.
+
+Returns: confirmation with record name on success.</field>
+        <field name="ai_tool_schema">{
+    "type": "object",
+    "properties": {
+        "model_name": {
+            "type": "string",
+            "description": "Odoo technical model name, e.g. res.partner, crm.lead, project.task, hr.employee"
+        },
+        "record_id": {
+            "type": "number",
+            "description": "Database ID of the record to archive. Use 0 if searching by name instead."
+        },
+        "search_name": {
+            "type": "string",
+            "description": "Name to search for the record if record_id is 0. Leave empty string if using record_id."
+        }
+    },
+    "required": ["model_name", "record_id", "search_name"]
+}</field>
+        <field name="code">if model_name not in env:
+    ai['result'] = f"ERROR: Model '{model_name}' does not exist."
+else:
+    target = None
+
+    if record_id:
+        target = env[model_name].sudo().browse(int(record_id))
+        if not target.exists():
+            ai['result'] = f"ERROR: No record found with ID {record_id} in {model_name}."
+            target = None
+    elif search_name:
+        target = env[model_name].sudo().search(
+            [['name', 'ilike', search_name], ['active', '=', True]], limit=1
+        )
+        if not target:
+            ai['result'] = f"ERROR: Cannot find active record '{search_name}' in {model_name}."
+            target = None
+    else:
+        ai['result'] = "ERROR: Please provide either record_id or search_name."
+
+    if target:
+        record_name = target.display_name
+        if 'active' not in env[model_name].sudo().fields_get(['active']):
+            ai['result'] = f"ERROR: Model {model_name} does not support archiving (no active field)."
+        else:
+            target.write({'active': False})
+            ai['result'] = (
+                f"Archived {model_name} record successfully.\n"
+                f"  ID: {target.id}\n"
+                f"  Name: {record_name}"
+            )</field>
+    </record>
+
+    <record id="ai_topic_crud_operations" model="ai.topic">
+        <field name="name">AI Skill Operations</field>
+        <field name="description">Enables AI to create, update, and archive records in any Odoo model via natural language.</field>
+        <field name="instructions"># Odoo CRUD Operations Agent
+
+**Purpose**: Execute create, update, archive operations on Odoo records based on user requests. Always call the appropriate tool directly — never simulate or fabricate results.
+
+## CRITICAL RULES
+
+- **ALWAYS call the tool** — never respond with "I have created/updated/deleted..." without actually calling the tool first and receiving the result.
+- **Wait for the tool result** before composing your reply.
+- **Report the actual result** from the tool to the user, whether success or error.
+- If a tool returns an error, tell the user exactly what went wrong and ask for the missing information.
+
+## Workflow
+
+### For CREATE operations
+1. Call **AI: Get Model Fields** first to know required fields and types.
+2. Then call **AI: Create Record** with the correct field values.
+
+### For UPDATE operations
+1. If you don't have the record ID, use **AI: Search** to find it first.
+2. Call **AI: Update Record** with the record ID and fields to change.
+
+### For ARCHIVE/DELETE operations
+1. If you don't have the record ID, use **AI: Search** to find it first.
+2. Call **AI: Archive Record** with the record ID.
+
+## Parameter Tips
+
+- Extract ALL relevant details from the user's message before calling a tool.
+- If a required field is missing, ask the user before calling.
+- For Many2one fields (e.g. country, user, company): pass the name in `name_fields`, not in `values`.
+- For Selection fields: use the exact option value shown by Get Model Fields.
+
+## Do NOT
+
+- Do NOT open menus or navigate to views after a CRUD operation unless explicitly asked.
+- Do NOT fabricate success messages before the tool returns a result.
+- Do NOT call the same tool twice for the same request.</field>
+        <field name="tool_ids" eval="[
+            (4, ref('ai_action_get_model_fields')),
+            (4, ref('ai_action_create_record')),
+            (4, ref('ai_action_update_record')),
+            (4, ref('ai_action_archive_record')),
+        ]"/>
+    </record>
+
+</odoo>

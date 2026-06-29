@@ -4,12 +4,12 @@
 #
 ################################################################################
 {
-    'name': 'AI Chatbot Enhance | RAG & Vector Search | Odoo Query & Record Automation',
+    'name': 'AI Chatbot Enhance | RAG & Vector Search | Odoo Query & Record Automation | AI RAG | AI Skills | AI Tools| AI Copilot | AI Assistant for Discuss | AI Studio | Studio | Odoo Studio',
     'version': '19.0.1.0.1',
     'category': 'Productivity/Discuss',
     'summary': "Key Features:- RAG (Retrieval-Augmented Generation): Elevate AI accuracy by ingesting custom documents and URLs, creating an intelligent corporate knowledge base.- OS & System Automation: Bridge the gap between generative AI and core operations, enabling autonomous task execution and system-level workflows.",
     'description': "A powerful, all-in-one AI orchestration module designed for Odoo. Effortlessly deploy and configure various large AI models while expanding their capabilities with advanced Retrieval-Augmented Generation (RAG) using your own documentation and web URLs. Armed with OS-level integration features, this module goes beyond simple chat, driving intelligent automation, contextual data analysis, and autonomous workflow execution directly within your Odoo environment.",
-    'author': 'Don Shan',
+    'author': 'Da Lei',
     'maintainer': 'Don Shan',
     'depends': ['mail'],
     'data': [
@@ -18,6 +18,9 @@
         'data/ai_agent_data.xml',
         'data/ai_composer_data.xml',
         'data/ai_providers_data.xml',
+        'data/ai_skills_crud_actions.xml',
+        'data/ai_skills_report_confirm_send_email.xml',
+        'data/ai_studio_actions_data.xml',
         'data/ir_ai_cron.xml',
         'security/ir.model.access.csv',
         'views/ai_agent_views.xml',
@@ -25,6 +28,8 @@
         'views/ai_providers_views.xml',
         'views/res_config_settings_views.xml',
         'views/ai_topic_views.xml',
+        'views/ai_actions_views.xml',
+        'views/ai_studio_views.xml',
         'views/ai_menus.xml',
         'views/templates.xml',
         'wizard/ai_agent_source_wizard_views.xml',
@@ -52,6 +57,6 @@
     'installable': True,
     'auto_install': False,
     'application': True,
-    'price': 1200,
+    'price': 450,
     'currency': "USD",
 }

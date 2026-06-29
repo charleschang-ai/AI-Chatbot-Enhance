@@ -7,3 +7,4 @@ access_ai_topic_system,access_ai_topic_system,model_ai_topic,base.group_system,1
 access_ai_provider_system,ai.provider.system,model_ai_provider,base.group_system,1,1,1,1
 access_ai_embedding_system,access_ai_embedding_system,model_ai_embedding,base.group_system,1,1,1,1
 access_source_wizard,access_source_wizard,model_ai_agent_source_wizard,base.group_system,1,1,1,1
+access_ai_studio_system,access_ai_studio_system,model_ai_studio,base.group_system,1,1,1,1

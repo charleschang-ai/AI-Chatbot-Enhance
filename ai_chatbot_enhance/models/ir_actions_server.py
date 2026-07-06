@@ -355,6 +355,13 @@ class IrActionsServer(models.Model):
         eval_context["records"] = record.sudo(False)
         eval_context["model"] = eval_context["model"].sudo(False)
         eval_context["env"] = self.env(su=False)
+
+        _logger.info(
+            "[AI DIAG] _ai_tool_run | action=%r | state=%r | has_code=%s | injected_keys=%s",
+            self.name, self.state, bool(self.code),
+            [k for k in arguments.keys()],
+        )
+
         if self.state == "code":
             self._run_action_code_multi(eval_context=eval_context)
             if eval_context.get('action'):

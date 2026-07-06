@@ -29,6 +29,7 @@ from ..utils.llm_providers import (
     get_provider,
 
 )
+from markupsafe import Markup  # ← 加這行
 
 _logger = logging.getLogger(__name__)
 
@@ -647,7 +648,7 @@ class AIAgent(models.Model):
             system_messages,
             [],
             inputs=(chat_history or []) + [{'role': 'user', 'content': prompt}],
-            tools=self.sudo().topic_ids.tool_ids._get_ai_tools(),
+            tools=self.sudo().topic_ids.tool_ids.with_context(ai_agent_id=self.id)._get_ai_tools(),
             temperature=TEMPERATURE_MAP[self.response_style],
         )
         if rag_context:
@@ -794,6 +795,21 @@ class AIAgent(models.Model):
                 messages.append(final_context_message)
                 messages.append(PREPROMPTS['context'])
         return messages
+
+    def post_html_to_channel(self, channel, body_html):
+        agent_id = self.env.context.get('ai_agent_id')
+        author_id = False
+        if agent_id:
+            agent = self.env['ai.agent'].sudo().browse(agent_id)
+            if agent.exists():
+                author_id = agent.partner_id.id
+        channel.sudo().message_post(
+            author_id=author_id or False,
+            body=Markup(body_html),
+            message_type='comment',
+            subtype_xmlid='mail.mt_comment',
+            silent=True,
+        )
 
     def _post_ai_response(self, channel, message):
         formatted_message = message

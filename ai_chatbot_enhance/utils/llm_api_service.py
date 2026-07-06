@@ -131,6 +131,14 @@ class LLMApiService:
             )
             all_responses.extend(responses)
 
+            _logger.info(
+                "[AI DIAG] Loop #%d | available_tools=%s | tool_calls=%s | text_response=%s",
+                api_call,
+                list(tools.keys()) if tools else [],
+                [(name, args) for name, _cid, args in next_actions],
+                responses,
+            )
+
             if not next_actions:
                 break
 

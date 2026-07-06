@@ -14,3 +14,4 @@ from . import models
 from . import ir_actions_server
 from . import ai_topic
 from . import mail_thread
+from . import ai_studio
